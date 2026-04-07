@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Border of Life</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Black+Han+Sans&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #c0000a;
+            --red-dark: #7a0005;
+            --red-bright: #ff1a26;
+            --black: #0a0a0a;
+            --white: #f5f0e8;
+            --accent: #ffffff;
+            --gray: #1a1a1a;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /*!* ── CUSTOM CURSOR ── *!*/
+        /*.cursor-dot {*/
+        /*    position: fixed; width: 8px; height: 8px;*/
+        /*    background: var(--red-bright); border-radius: 50%;*/
+        /*    pointer-events: none; z-index: 9999;*/
+        /*    transform: translate(-50%, -50%);*/
+        /*    transition: transform 0.1s ease;*/
+        /*}*/
+
+        /* ── NOISE OVERLAY ── */
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 0; opacity: 0.3;
+        }
+
+        /* ── NAVIGATION ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 3rem;
+            background: linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, transparent 100%);
+            height: 70px;
+        }
+
+        .nav-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            letter-spacing: 0.15em;
+            color: var(--white);
+            text-decoration: none;
+        }
+        .nav-logo span { color: var(--red-bright); }
+
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--white);
+            text-decoration: none;
+            position: relative;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute; bottom: -4px; left: 0; right: 0;
+            height: 1px; background: var(--red-bright);
+            transform: scaleX(0); transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        .nav-links a:hover { opacity: 1; }
+        .nav-links a:hover::after { transform: scaleX(1); }
+
+        /* ── HERO ── */
+        #hero {
+            position: relative; min-height: 100vh;
+            display: flex; flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 70% 40%, var(--red-dark) 0%, var(--red) 30%, #3d0003 65%, var(--black) 100%);
+        }
+
+        /* Diagonal slashes */
+        .slash {
+            position: absolute;
+            background: var(--black);
+            transform-origin: left center;
+            pointer-events: none;
+        }
+        .slash-1 {
+            bottom: 18%; left: -5%; right: -5%;
+            height: 90px;
+            transform: rotate(-3deg);
+        }
+        .slash-2 {
+            bottom: 8%; left: -5%; right: -5%;
+            height: 60px;
+            transform: rotate(-3deg);
+            background: #111;
+        }
+
+        /* White outline lines */
+        .line {
+            position: absolute;
+            background: white;
+            pointer-events: none;
+        }
+        .line-1 {
+            bottom: calc(18% + 90px - 2px);
+            left: 0; right: 0;
+            height: 2px;
+            transform: rotate(-3deg);
+        }
+        .line-2 {
+            bottom: calc(8% + 60px - 2px);
+            left: 0; right: 0;
+            height: 2px;
+            transform: rotate(-3deg);
+        }
+
+        /* Silhouette figure area */
+        .hero-silhouette {
+            position: absolute;
+            right: 8%;
+            bottom: calc(18% + 88px);
+            width: 320px;
+            height: 500px;
+            display: flex; align-items: flex-end;
+            animation: silhouette-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+        }
+
+        @keyframes silhouette-in {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .silhouette-svg {
+            width: 150%; height: 150%;
+        }
+
+        /* Tip box */
+        .tip-box {
+            position: absolute;
+            top: 90px; left: 3rem;
+            background: var(--black);
+            padding: 0.35rem 1.2rem;
+            animation: tip-in 0.8s ease 0.8s both;
+        }
+
+        @keyframes tip-in {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .tip-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            color: var(--red-bright);
+            letter-spacing: 0.05em;
+            line-height: 1;
+            text-shadow: 2px 2px 0 var(--black), -1px -1px 0 var(--black);
+        }
+
+        .tip-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            color: var(--white);
+            letter-spacing: 0.05em;
+            text-shadow: 1px 1px 0 var(--black);
+        }
+
+        /* Hero text content */
+        .hero-content {
+            position: relative; z-index: 5;
+            padding: 0 3rem 3rem;
+            animation: content-in 1s ease 0.5s both;
+        }
+
+        @keyframes content-in {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-tagline {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--red-bright);
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(5rem, 12vw, 10rem);
+            line-height: 0.85;
+            letter-spacing: 0.04em;
+            color: var(--white);
+            text-shadow: 4px 4px 0 var(--red-dark), 8px 8px 0 rgba(0,0,0,0.5);
+            margin-bottom: 1rem;
+        }
+
+        .hero-title em {
+            font-style: normal;
+            color: var(--red-bright);
+            -webkit-text-stroke: 2px var(--red-bright);
+            text-shadow: 0 0 30px rgba(255,26,38,0.5), 4px 4px 0 var(--red-dark);
+        }
+
+        .hero-subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(245,240,232,0.7);
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-buttons { display: flex; gap: 1rem; align-items: center; }
+
+        .btn-primary {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 0.15em;
+            padding: 0.8rem 2.5rem;
+            background: var(--red);
+            color: var(--white);
+            border: none; cursor: pointer;
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+            transition: background 0.2s, transform 0.15s;
+            text-decoration: none; display: inline-block;
+            position: relative;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: var(--red-bright);
+            clip-path: inherit;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-primary:hover::before { opacity: 1; }
+        .btn-primary span { position: relative; z-index: 1; }
+
+        .btn-secondary {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            color: var(--white);
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+            text-decoration: none; display: inline-block;
+        }
+        .btn-secondary:hover { border-color: var(--red-bright); color: var(--red-bright); }
+
+        /* ── CHARACTER SECTION ── */
+        #characters {
+            position: relative;
+            background: var(--black);
+            padding: 6rem 3rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex; align-items: center; gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+        .section-num {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--red-bright);
+            letter-spacing: 0.2em;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+        .section-title-wrap {}
+        .section-title-small {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            color: rgba(245,240,232,0.4);
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            letter-spacing: 0.05em;
+            color: var(--white);
+            line-height: 1;
+        }
+        .section-line {
+            flex: 1; height: 1px;
+            background: linear-gradient(to right, rgba(255,255,255,0.15) 0%, transparent 100%);
+        }
+
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2px;
+        }
+
+        .char-card {
+            position: relative;
+            background: var(--gray);
+            padding: 2.5rem 2rem;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .char-card:hover { transform: translateY(-4px); }
+        .char-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--red);
+            transform: scaleX(0); transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .char-card:hover::before { transform: scaleX(1); }
+
+        .char-card-bg {
+            position: absolute; inset: 0;
+            background: var(--red);
+            opacity: 0;
+            transition: opacity 0.3s;
+            mix-blend-mode: multiply;
+        }
+        .char-card:hover .char-card-bg { opacity: 0.15; }
+
+        .char-silhouette {
+            width: 100px; height: 160px;
+            margin: 0 auto 1.5rem;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+
+        .char-code {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            color: var(--red-bright);
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .char-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.2rem;
+            letter-spacing: 0.08em;
+            color: var(--white);
+            margin-bottom: 0.2rem;
+        }
+
+        .char-alias {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(245,240,232,0.5);
+            margin-bottom: 1rem;
+        }
+
+        .char-quote {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(245,240,232,0.6);
+            font-style: italic;
+            line-height: 1.6;
+            border-left: 2px solid var(--red);
+            padding-left: 0.8rem;
+        }
+
+        /* ── FEATURES SECTION ── */
+        #features {
+            background: linear-gradient(135deg, #0a0a0a 0%, #150002 50%, #0a0a0a 100%);
+            padding: 6rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #features::before {
+            content: 'BORDER';
+            position: absolute;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 25vw;
+            color: rgba(255,255,255,0.02);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            letter-spacing: 0.1em;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            position: relative; z-index: 1;
+        }
+
+        .feature {
+            display: flex; gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .feature-icon {
+            width: 48px; height: 48px; flex-shrink: 0;
+            background: var(--red);
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .feature-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.08em;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: rgba(245,240,232,0.55);
+            line-height: 1.7;
+        }
+
+        /* ── STORY SECTION ── */
+        #story {
+            background: var(--black);
+            padding: 6rem 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            #story { grid-template-columns: 1fr; gap: 3rem; }
+        }
+
+        .story-text {}
+
+        .story-body {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: rgba(245,240,232,0.65);
+            margin-top: 2rem;
+        }
+
+        .story-body strong {
+            color: var(--red-bright);
+            font-weight: 700;
+        }
+
+        .story-art {
+            position: relative;
+            /*aspect-ratio: 3/4;*/
+            background: var(--gray);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+
+        .story-art::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, var(--red-dark) 0%, transparent 60%);
+            opacity: 0.6;
+        }
+
+        .story-art-inner {
+            position: relative; z-index: 1;
+            text-align: center;
+        }
+
+        .art-placeholder {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 8rem;
+            color: rgba(255,255,255,0.06);
+            line-height: 1;
+            display: block;
+        }
+
+        .art-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            color: rgba(255,255,255,0.25);
+            text-transform: uppercase;
+        }
+
+        /* Big red divider */
+        .divider {
+            height: 6px;
+            background: linear-gradient(to right, var(--red) 0%, var(--red-bright) 50%, var(--red) 100%);
+        }
+
+        /* ── COUNTDOWN / RELEASE ── */
+        #release {
+            background: var(--red);
+            padding: 4rem 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #release::before, #release::after {
+            content: '';
+            position: absolute;
+            background: rgba(0,0,0,0.1);
+            width: 300px; height: 300px;
+            border-radius: 50%;
+        }
+        #release::before { top: -150px; left: -100px; }
+        #release::after { bottom: -150px; right: -100px; }
+
+        .release-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 1rem;
+        }
+
+        .release-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            letter-spacing: 0.05em;
+            color: var(--white);
+            margin-bottom: 2rem;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+        }
+
+        .countdown {
+            display: flex; gap: 2rem;
+            justify-content: center; align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .count-item { text-align: center; }
+        .count-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 1;
+            color: var(--white);
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+        }
+        .count-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.25em;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            margin-top: 0.3rem;
+        }
+        .count-sep {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4rem;
+            color: rgba(255,255,255,0.4);
+            line-height: 1;
+            margin-top: -1rem;
+        }
+
+        .newsletter {
+            display: flex; gap: 0;
+            max-width: 440px; margin: 0 auto;
+        }
+
+        .newsletter input {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-right: none;
+            padding: 0.9rem 1.2rem;
+            color: var(--white);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            outline: none;
+        }
+        .newsletter input::placeholder { color: rgba(255,255,255,0.4); }
+        .newsletter input:focus { border-color: rgba(255,255,255,0.6); }
+
+        .newsletter button {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.1em;
+            padding: 0.9rem 1.5rem;
+            background: var(--black);
+            color: var(--white);
+            border: 1px solid var(--black);
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .newsletter button:hover { background: #222; }
+
+        /* ── FOOTER ── */
+        footer {
+            background: #050505;
+            padding: 3rem;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .footer-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.15em;
+            color: var(--white);
+        }
+        .footer-logo span { color: var(--red-bright); }
+
+        .footer-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            color: rgba(245,240,232,0.3);
+            letter-spacing: 0.15em;
+            text-align: center;
+        }
+
+        .footer-links { display: flex; gap: 2rem; }
+        .footer-links a {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            color: rgba(245,240,232,0.35);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--red-bright); }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--black); }
+        ::-webkit-scrollbar-thumb { background: var(--red); }
+
+        /* ── ANIMATIONS ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Animated scan line */
+        .scanline {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 2px;
+            background: rgba(255,26,38,0.15);
+            animation: scan 4s linear infinite;
+            pointer-events: none; z-index: 50;
+        }
+        @keyframes scan {
+            from { top: -2px; }
+            to { top: 100vh; }
+        }
+
+        @media (max-width: 640px) {
+            nav { padding: 0 1.5rem; }
+            .nav-links { display: none; }
+            .hero-content { padding: 0 1.5rem 3rem; }
+            .tip-box { left: 1.5rem; }
+            .hero-silhouette { right: 0; width: 200px; }
+            #characters, #features, #story, footer { padding: 4rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursor"></div>
+<div class="scanline"></div>
+
+<!-- NAV -->
+<nav>
+    <a href="#" class="nav-logo">BORDER<span>.</span>OF<span>.</span>LIFE</a>
+    <ul class="nav-links">
+        <li><a href="#characters">PARTY</a></li>
+        <li><a href="#features">GAMEPLAY</a></li>
+        <li><a href="#story">STORY</a></li>
+        <li><a href="#release">WISHLIST</a></li>
+    </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+    <div class="hero-bg"></div>
+
+    <!-- Diagonal geometry -->
+    <div class="slash slash-1"></div>
+    <div class="slash slash-2"></div>
+    <div class="line line-1"></div>
+    <div class="line line-2"></div>
+
+    <!-- Tip box -->
+    <div class="tip-box">
+        <div class="tip-label">Tip:</div>
+        <div class="tip-text">Destroy the Gates.</div>
+    </div>
+
+    <!-- Character silhouette -->
+    <div class="hero-silhouette">
+        <img src="images/OutlineChar.png" alt="Onyx" class="silhouette-svg" style="object-fit:contain; object-position:bottom;">
+    </div>
+
+    <!-- Main hero text -->
+    <div class="hero-content">
+        <div class="hero-tagline">▶ JRPG / HACK & SLASH / MYSTERY</div>
+        <h1 class="hero-title">BORDER<br><em>OF LIFE</em></h1>
+        <p class="hero-subtitle">Cross the threshold. Uncover the truth.</p>
+        <div class="hero-buttons">
+            <a href="#release" class="btn-primary"><span>WISHLIST NOW</span></a>
+            <a href="#story" class="btn-secondary">LEARN MORE</a>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CHARACTERS -->
+<section id="characters">
+    <div class="section-header reveal">
+        <div class="section-num">01</div>
+        <div class="section-title-wrap">
+            <div class="section-title-small">// PARTY MEMBERS</div>
+            <div class="section-title">THE SEEKERS</div>
+        </div>
+        <div class="section-line"></div>
+    </div>
+
+    <div class="characters-grid">
+        <!-- Onyx -->
+        <div class="char-card reveal">
+            <div class="char-card-bg"></div>
+            <div class="char-silhouette">
+                <img src="images/OutlineChar.png" alt="Onyx" style="width:80px; height:140px; object-fit:contain; object-position:center bottom; ;">
+            </div>
+            <div class="char-code">// PROTAGONIST</div>
+            <div class="char-name">ONYX</div>
+            <div class="char-alias">CODE: REDDUSK</div>
+            <div class="char-quote">"What are they hiding...?"</div>
+        </div>
+
+        <!-- Add more characters as placeholders -->
+        <div class="char-card reveal" style="transition-delay: 0.1s;">
+            <div class="char-card-bg"></div>
+            <div class="char-silhouette">
+                <img src="images/OutlineChar2.png" alt="Onyx" style="width:80px; height:140px; object-fit:contain; object-position:center bottom; ;">
+            </div>
+            <div class="char-code">// ALLY</div>
+            <div class="char-name">???</div>
+            <div class="char-alias">CODE: UNKNOWN</div>
+            <div class="char-quote">"I've seen what's on the other side."</div>
+        </div>
+
+        <div class="char-card reveal" style="transition-delay: 0.2s;">
+            <div class="char-card-bg"></div>
+            <div class="char-silhouette">
+                <img src="images/OutlineChar2.png" alt="Onyx" style="width:80px; height:140px; object-fit:contain; object-position:center bottom; ;">
+            </div>
+            <div class="char-code">// RIVAL</div>
+            <div class="char-name">???</div>
+            <div class="char-alias">CODE: UNKNOWN</div>
+            <div class="char-quote">"The Gate chooses its own."</div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+    <div class="section-header reveal">
+        <div class="section-num">02</div>
+        <div class="section-title-wrap">
+            <div class="section-title-small">// CORE SYSTEMS</div>
+            <div class="section-title">GAMEPLAY</div>
+        </div>
+        <div class="section-line"></div>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature reveal">
+            <div class="feature-icon">⚡</div>
+            <div>
+                <div class="feature-title">ACTION COMBAT</div>
+                <div class="feature-desc">Fast, fluid hack-and-slash combat that rewards aggression and precision. Chain attacks, read enemy patterns, and tear through the Gates before they tear through you.</div>
+            </div>
+        </div>
+        <div class="feature reveal" style="transition-delay:0.1s;">
+            <div class="feature-icon">💥</div>
+            <div>
+                <div class="feature-title">COMBO CHAINS & ULTIMATES</div>
+                <div class="feature-desc">String together devastating combos that build toward explosive ultimate abilities. The longer you stay in rhythm, the harder you hit — break the chain and pay the price.</div>
+            </div>
+        </div>
+        <div class="feature reveal" style="transition-delay:0.2s;">
+            <div class="feature-icon">🚪</div>
+            <div>
+                <div class="feature-title">DESTROY THE GATES</div>
+                <div class="feature-desc">Hunt down and shatter the Gates corrupting each dungeon. Every Gate is a gauntlet with its own rules — crack them open and face whatever's been hiding inside.</div>
+            </div>
+        </div>
+        <div class="feature reveal" style="transition-delay:0.3s;">
+            <div class="feature-icon">🗺️</div>
+            <div>
+                <div class="feature-title">DUNGEON CRAWLING</div>
+                <div class="feature-desc">Descend into shifting, treacherous dungeons that warp reality the deeper you go. Each floor holds secrets, ambushes, and rewards for those bold enough to push further.</div>
+            </div>
+        </div>
+        <div class="feature reveal" style="transition-delay:0.4s;">
+            <div class="feature-icon">📖</div>
+            <div>
+                <div class="feature-title">BRANCHING STORY</div>
+                <div class="feature-desc">Your choices shape the world and those in it. Alliances shift, doors open and close, and the truth changes depending on the path you take to find it.</div>
+            </div>
+        </div>
+        <div class="feature reveal" style="transition-delay:0.5s;">
+            <div class="feature-icon">🔧</div>
+            <div>
+                <div class="feature-title">CRAFTING & PROGRESSION</div>
+                <div class="feature-desc">Salvage materials from the dungeons you clear and forge gear, upgrades, and consumables. Build Onyx into the fighter the Border demands — your way.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STORY -->
+<section id="story">
+    <div class="story-text reveal">
+        <div class="section-header" style="margin-bottom:2rem;">
+            <div class="section-num">03</div>
+            <div class="section-title-wrap">
+                <div class="section-title-small">// THE NARRATIVE</div>
+                <div class="section-title">STORY</div>
+            </div>
+        </div>
+        <p class="story-body">
+            Somewhere between the waking world and oblivion, there exists a <strong>Border</strong>.<br><br>
+            For most, it is invisible — a boundary they'll only cross once, at the very end. But <strong>ONYX</strong> can see it. Has always seen it. And lately, the Gates along that Border have been breaking open.<br><br>
+            Something is leaking through. Something is <strong>hiding</strong> behind the faces of ordinary people, warping their minds from within. And the only way to stop it is to go beyond — to step across the Border of Life and unmask whatever waits in the dark.<br><br>
+            <strong>What are they hiding?</strong> You'll have to cross the border to find out.
+        </p>
+    </div>
+
+    <div class="story-art reveal" style="transition-delay:0.2s;">
+        <img src="images/Background.png"  alt="Background">
+
+<!--        <div class="story-art-inner">-->
+<!--            <span class="art-placeholder">BOL</span>-->
+<!--            <div class="art-label">KEY ART — COMING SOON</div>-->
+<!--        </div>-->
+<!--        &lt;!&ndash; Red diagonal slash across art box &ndash;&gt;-->
+<!--        <div style="position:absolute; bottom:0; left:0; right:0; height:4px; background:var(&#45;&#45;red);"></div>-->
+<!--        <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:var(&#45;&#45;red);"></div>-->
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RELEASE -->
+<section id="release">
+    <div class="release-label">▶ DEVELOPMENT IN PROGRESS</div>
+    <h2 class="release-title">WISHLIST &amp; FOLLOW THE JOURNEY</h2>
+
+    <div class="countdown" id="countdown">
+        <div class="count-item">
+            <div class="count-num" id="cd-days">--</div>
+            <div class="count-label">Days</div>
+        </div>
+        <div class="count-sep">:</div>
+        <div class="count-item">
+            <div class="count-num" id="cd-hours">--</div>
+            <div class="count-label">Hours</div>
+        </div>
+        <div class="count-sep">:</div>
+        <div class="count-item">
+            <div class="count-num" id="cd-mins">--</div>
+            <div class="count-label">Minutes</div>
+        </div>
+        <div class="count-sep">:</div>
+        <div class="count-item">
+            <div class="count-num" id="cd-secs">--</div>
+            <div class="count-label">Seconds</div>
+        </div>
+    </div>
+
+    <p style="font-family:'Share Tech Mono',monospace; font-size:0.7rem; color:rgba(255,255,255,0.6); letter-spacing:0.2em; margin-bottom:1.5rem;">
+        ENTER YOUR EMAIL TO RECEIVE UPDATES ON BORDER OF LIFE
+    </p>
+
+    <div class="newsletter">
+        <input type="email" placeholder="your@email.com" id="email-input">
+        <button onclick="handleWishlist()">NOTIFY ME</button>
+    </div>
+    <div id="wishlist-msg" style="font-family:'Share Tech Mono',monospace; font-size:0.7rem; color:rgba(255,255,255,0.7); margin-top:1rem; letter-spacing:0.15em; min-height:1.2rem;"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-logo">BORDER<span>.</span>OF<span>.</span>LIFE</div>
+    <div class="footer-text">© 2026 Border of Life — All rights reserved<br>Made with ❤️ and chaos</div>
+    <div class="footer-links">
+        <a href="#">TWITTER/X</a>
+        <a href="#">DISCORD</a>
+        <a href="#">ITCH.IO</a>
+    </div>
+</footer>
+
+<script>
+    // Cursor
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) e.target.classList.add('visible');
+        });
+    }, { threshold: 0.15 });
+    reveals.forEach(r => observer.observe(r));
+
+    // Countdown — target: Dec 31 2026 (placeholder)
+    const target = new Date('2026-12-31T00:00:00');
+    function updateCountdown() {
+        const now = new Date();
+        const diff = target - now;
+        if (diff <= 0) {
+            document.getElementById('countdown').innerHTML = '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:3rem;letter-spacing:0.1em;color:white;">THE BORDER OPENS NOW</div>';
+            return;
+        }
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        document.getElementById('cd-days').textContent = String(days).padStart(2,'0');
+        document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+        document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
+        document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // Newsletter
+    async function handleWishlist() {
+        const email = document.getElementById('email-input').value;
+        const msg = document.getElementById('wishlist-msg');
+
+        if (!email || !email.includes('@')) {
+            msg.textContent = '// ERROR: INVALID EMAIL FORMAT';
+            msg.style.color = 'rgba(255,255,200,0.8)';
+            return;
+        }
+
+        msg.textContent = '// SENDING...';
+
+        try {
+            const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            if (res.ok) {
+                msg.textContent = '// REGISTERED — YOU WILL BE NOTIFIED WHEN THE BORDER OPENS.';
+                msg.style.color = 'rgba(255,255,255,0.9)';
+                document.getElementById('email-input').value = '';
+            } else {
+                msg.textContent = '// ERROR: SUBMISSION FAILED. TRY AGAIN.';
+                msg.style.color = 'rgba(255,100,100,0.9)';
+            }
+        } catch {
+            msg.textContent = '// ERROR: NETWORK ISSUE. TRY AGAIN.';
+            msg.style.color = 'rgba(255,100,100,0.9)';
+        }
+    }
+
+    document.getElementById('email-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') handleWishlist();
+    });
+</script>
+</body>
+</html>
