@@ -28,15 +28,6 @@
             cursor: crosshair;
         }
 
-        /*!* ── CUSTOM CURSOR ── *!*/
-        /*.cursor-dot {*/
-        /*    position: fixed; width: 8px; height: 8px;*/
-        /*    background: var(--red-bright); border-radius: 50%;*/
-        /*    pointer-events: none; z-index: 9999;*/
-        /*    transform: translate(-50%, -50%);*/
-        /*    transition: transform 0.1s ease;*/
-        /*}*/
-
         /* ── NOISE OVERLAY ── */
         body::after {
             content: '';
@@ -136,26 +127,58 @@
             transform: rotate(-3deg);
         }
 
-        /* Silhouette figure area */
+        /* ── HERO SILHOUETTE ── */
         .hero-silhouette {
             position: absolute;
-            right: 8%;
+            right: clamp(1rem, 8vw, 20%);
             bottom: calc(18% + 88px);
-            width: 320px;
-            height: 500px;
-            display: flex; align-items: flex-end;
-            animation: silhouette-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+
+            width: clamp(180px, 25vw, 320px);
+            max-width: 90vw;
+            max-height: 85vh;
+
+            display: flex;
+            align-items: flex-end;
+
+            animation:
+                    silhouette-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both,
+                    floatIdle 8s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+            animation-delay: 0.3s, -2.3s;
         }
 
-        @keyframes silhouette-in {
-            from { opacity: 0; transform: translateX(60px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
+        /* Make sure image behaves properly */
         .silhouette-svg {
-            width: 150%; height: 150%;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
+        /* Entry animation */
+        @keyframes silhouette-in {
+            from {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Floating idle animation */
+        @keyframes floatIdle {
+            0%   { transform: translate(0px, 0px); }
+
+            15%  { transform: translate(-10px, -12px); }
+            33%  { transform: translate(6px, -22px); }
+            45%  { transform: translate(14px, -8px); }
+
+            62%  { transform: translate(-8px, -26px); }
+            75%  { transform: translate(10px, -14px); }
+            90%  { transform: translate(-6px, -18px); }
+
+            100% { transform: translate(0px, 0px); }
+        }
         /* Tip box */
         .tip-box {
             position: absolute;
@@ -482,7 +505,6 @@
 
         .story-art {
             position: relative;
-            /*aspect-ratio: 3/4;*/
             background: var(--gray);
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
@@ -702,7 +724,6 @@
 </head>
 <body>
 
-<div class="cursor-dot" id="cursor"></div>
 <div class="scanline"></div>
 
 <!-- NAV -->
@@ -767,7 +788,7 @@
         <div class="char-card reveal">
             <div class="char-card-bg"></div>
             <div class="char-silhouette">
-                <img src="images/OutlineChar.png" alt="Onyx" style="width:80px; height:140px; object-fit:contain; object-position:center bottom; ;">
+                <img src="images/OutlineChar.png" alt="Onyx" style="width:80px; height:140px; object-fit:contain; object-position:center bottom;">
             </div>
             <div class="char-code">// PROTAGONIST</div>
             <div class="char-name">ONYX</div>
@@ -775,11 +796,10 @@
             <div class="char-quote">"What are they hiding...?"</div>
         </div>
 
-        <!-- Add more characters as placeholders -->
         <div class="char-card reveal" style="transition-delay: 0.1s;">
             <div class="char-card-bg"></div>
             <div class="char-silhouette">
-                <img src="images/OutlineChar2.png" alt="Onyx" style="width:80px; height:140px; object-fit:contain; object-position:center bottom; ;">
+                <img src="images/OutlineChar2.png" alt="Unknown" style="width:80px; height:140px; object-fit:contain; object-position:center bottom;">
             </div>
             <div class="char-code">// ALLY</div>
             <div class="char-name">???</div>
@@ -790,7 +810,7 @@
         <div class="char-card reveal" style="transition-delay: 0.2s;">
             <div class="char-card-bg"></div>
             <div class="char-silhouette">
-                <img src="images/OutlineChar2.png" alt="Onyx" style="width:80px; height:140px; object-fit:contain; object-position:center bottom; ;">
+                <img src="images/OutlineChar2.png" alt="Unknown" style="width:80px; height:140px; object-fit:contain; object-position:center bottom;">
             </div>
             <div class="char-code">// RIVAL</div>
             <div class="char-name">???</div>
@@ -876,15 +896,7 @@
     </div>
 
     <div class="story-art reveal" style="transition-delay:0.2s;">
-        <img src="images/Background.png"  alt="Background">
-
-<!--        <div class="story-art-inner">-->
-<!--            <span class="art-placeholder">BOL</span>-->
-<!--            <div class="art-label">KEY ART — COMING SOON</div>-->
-<!--        </div>-->
-<!--        &lt;!&ndash; Red diagonal slash across art box &ndash;&gt;-->
-<!--        <div style="position:absolute; bottom:0; left:0; right:0; height:4px; background:var(&#45;&#45;red);"></div>-->
-<!--        <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:var(&#45;&#45;red);"></div>-->
+        <img src="images/Background.png" alt="Background">
     </div>
 </section>
 
@@ -933,20 +945,13 @@
     <div class="footer-logo">BORDER<span>.</span>OF<span>.</span>LIFE</div>
     <div class="footer-text">© 2026 Border of Life — All rights reserved<br>Made with ❤️ and chaos</div>
     <div class="footer-links">
-        <a href="#">TWITTER/X</a>
-        <a href="#">DISCORD</a>
+        <a href="https://x.com/monsenity">TWITTER/X</a>
+        <a href="https://discord.gg/Kz72FAeZwn">DISCORD</a>
         <a href="#">ITCH.IO</a>
     </div>
 </footer>
 
 <script>
-    // Cursor
-    const cursor = document.getElementById('cursor');
-    document.addEventListener('mousemove', e => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-    });
-
     // Scroll reveal
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
@@ -977,7 +982,7 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Newsletter
+    // Newsletter — replace fetch URL with your submit.php once ready
     async function handleWishlist() {
         const email = document.getElementById('email-input').value;
         const msg = document.getElementById('wishlist-msg');
@@ -991,13 +996,15 @@
         msg.textContent = '// SENDING...';
 
         try {
-            const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+            const res = await fetch('submit.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
             });
 
-            if (res.ok) {
+            const data = await res.json();
+
+            if (data.success) {
                 msg.textContent = '// REGISTERED — YOU WILL BE NOTIFIED WHEN THE BORDER OPENS.';
                 msg.style.color = 'rgba(255,255,255,0.9)';
                 document.getElementById('email-input').value = '';
